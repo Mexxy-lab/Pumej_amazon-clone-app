@@ -11,7 +11,7 @@ pipeline {
     stages {
         stage('SCM Checkout') {
             steps{
-           git branch: 'pumejbranch', url: 'https://github.com/Mexxy-lab/Amazon-clone-Dockerized.git'
+           git branch: 'main', url: 'https://github.com/Mexxy-lab/Pumej_amazon-clone-app.git'
             }
         }
         // run sonarqube test
