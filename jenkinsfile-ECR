@@ -40,7 +40,7 @@ pipeline {
         stage('Upload Image to ACR') {
          steps{
              script {
-                 docker.withRegistry( "http://${registyUrl}", 'ecr:ap-south-1:pumejawsacr' ) {
+                 docker.withRegistry( "http://${registyUrl}/${ACR_NAME}", 'ecr:ap-south-1:pumejawsacr' ) {
                // dockerImage.push()
               sh "docker push ${registyUrl}/${IMAGE_NAME}:${IMAGE_TAG}"
                   }
