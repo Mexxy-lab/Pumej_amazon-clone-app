@@ -7,7 +7,7 @@ pipeline {
     environment {
     ACR_NAME = "pumejrepo"
     registyUrl = "598189530267.dkr.ecr.ap-south-1.amazonaws.com"
-    IMAGE_NAME = "pumej_amazon-webapp"
+    //IMAGE_NAME = "pumej_amazon-webapp"
     IMAGE_TAG = "v1.0"
     }
     stages {
@@ -32,7 +32,7 @@ pipeline {
         steps {
                 script {
                     //dockerImage = docker.build registryUrl
-                 def dockerImage = docker.build("${registyUrl}/${IMAGE_NAME}:${IMAGE_TAG}", '.')
+                 def dockerImage = docker.build("${registyUrl}/${ACR_NAME}:${IMAGE_TAG}", '.')
                 }
             }
        }
@@ -42,7 +42,7 @@ pipeline {
              script {
                  docker.withRegistry( "http://${registyUrl}/${ACR_NAME}", 'ecr:ap-south-1:pumejawsacr' ) {
                // dockerImage.push()
-              sh "docker push ${registyUrl}/${IMAGE_NAME}:${IMAGE_TAG}"
+              sh "docker push ${registyUrl}/${ACR_NAME}:${IMAGE_TAG}"
                   }
               }
          }
