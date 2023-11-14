@@ -8,13 +8,13 @@ pipeline {
     ACR_NAME = "pumejrepo"
     registyUrl = "598189530267.dkr.ecr.ap-south-1.amazonaws.com"
     IMAGE_NAME = "pumej_amazon-webapp"
-    IMAGE_TAG = "v1.1.0"
+    IMAGE_TAG = "v1.0"
     registryCredential  = "pumejawsacr"
     }
     stages {
         stage('SCM Checkout') {
             steps{
-           git branch: 'master', url: 'https://github.com/Mexxy-lab/Pumej_amazon-clone-app.git'
+           git branch: 'main', url: 'https://github.com/Mexxy-lab/Pumej_amazon-clone-app.git'
             }
         }
         // run sonarqube test
