@@ -9,7 +9,6 @@ pipeline {
     registyUrl = "598189530267.dkr.ecr.ap-south-1.amazonaws.com"
     IMAGE_NAME = "pumej_amazon-webapp"
     IMAGE_TAG = "v1.0"
-    registryCredential  = "pumejawsacr"
     }
     stages {
         stage('SCM Checkout') {
@@ -41,7 +40,7 @@ pipeline {
         stage('Upload Image to ACR') {
          steps{
              script {
-                 docker.withRegistry( "http://${registyUrl}", registryCredential ) {
+                 docker.withRegistry( "http://${registyUrl}", 'ecr:ap-south-1:pumejawsacr' ) {
                // dockerImage.push()
               sh "docker push ${registyUrl}/${IMAGE_NAME}:${IMAGE_TAG}"
                   }
