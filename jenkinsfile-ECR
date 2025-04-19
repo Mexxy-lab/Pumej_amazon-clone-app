@@ -63,7 +63,9 @@ pipeline {
         stage('Build Docker image') {
             steps {
                 script {
-                    docker.build("${registyUrl}/${ECR_NAME}:${IMAGE_TAG}", '.')
+                    sh """
+                        docker build --network=host -t ${registyUrl}/${ECR_NAME}:${IMAGE_TAG} .
+                    """
                 }
             }
         }
