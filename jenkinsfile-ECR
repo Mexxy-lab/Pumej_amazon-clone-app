@@ -68,7 +68,7 @@ pipeline {
             }
         }
 
-        stage('Upload Image to ACR') {
+        stage('Upload Image to Amazon Container Repository') {
             steps {
                 script {
                     docker.withRegistry("http://${registyUrl}/${ECR_NAME}", 'ecr:ap-south-1:pumejawsecr') {
