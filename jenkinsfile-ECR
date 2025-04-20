@@ -92,7 +92,7 @@ pipeline {
 
     post {
         always {
-            slackSend color: "good", message: "Build Deployed Successfully, Downstream Job Triggered Completed!!!"
+            slackSend channel: '#build-notifications', color: 'good', message: "✅ *Build Deployed Successfully*, downstream job triggered!"
         }
     }
 }
