@@ -74,7 +74,7 @@ pipeline {
         stage('Upload Image to Amazon Container Repository') {
             steps {
                 script {
-                    docker.withRegistry("http://${registyUrl}/${ECR_NAME}", 'ecr:ap-south-1:pumejawsecr') {
+                    docker.withRegistry("https://${registyUrl}", 'ecr:ap-south-1:pumejawsecr') {
                         sh "docker push ${registyUrl}/${ECR_NAME}:${IMAGE_TAG}"
                     }
                 }
