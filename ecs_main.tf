@@ -68,3 +68,102 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_policy" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
   role       = aws_iam_role.ecs_task_execution_role.name
 }
+
+
+# Digital Ocean Cloud Infrastructure set up 
+
+# Define the provider for DigitalOcean
+# provider "digitalocean" {
+#   token = var.do_token
+# }
+
+# variable "do_token" {}
+
+# variable "region" {
+#   default = "sgp1" # Singapore; change as needed
+# }
+
+# variable "cluster_name" {
+#   default = "pumej-k8s-cluster"
+# }
+
+# # Create a Kubernetes cluster on DigitalOcean
+# resource "digitalocean_kubernetes_cluster" "pumej_cluster" {
+#   name    = var.cluster_name
+#   region  = var.region
+#   version = "1.29.1-do.0" # Check latest version
+
+#   node_pool {
+#     name       = "pumej-node-pool"
+#     size       = "s-2vcpu-4gb"
+#     node_count = 1
+#   }
+# }
+
+# # Create a namespace (optional)
+# resource "kubernetes_namespace" "pumej" {
+#   metadata {
+#     name = "pumej"
+#   }
+# }
+
+# # Deploy your container using Kubernetes Deployment
+# resource "kubernetes_deployment" "pumej_app" {
+#   metadata {
+#     name      = "pumej-app"
+#     namespace = kubernetes_namespace.pumej.metadata[0].name
+#     labels = {
+#       app = "pumej"
+#     }
+#   }
+
+#   spec {
+#     replicas = 1
+
+#     selector {
+#       match_labels = {
+#         app = "pumej"
+#       }
+#     }
+
+#     template {
+#       metadata {
+#         labels = {
+#           app = "pumej"
+#         }
+#       }
+
+#       spec {
+#         container {
+#           image = "pumejlab/amazon:v1.0"
+#           name  = "pumej-container"
+
+#           port {
+#             container_port = 3000
+#           }
+#         }
+#       }
+#     }
+#   }
+# }
+
+# # Expose the deployment via a LoadBalancer service
+# resource "kubernetes_service" "pumej_service" {
+#   metadata {
+#     name      = "pumej-service"
+#     namespace = kubernetes_namespace.pumej.metadata[0].name
+#   }
+
+#   spec {
+#     selector = {
+#       app = kubernetes_deployment.pumej_app.metadata[0].labels.app
+#     }
+
+#     port {
+#       port        = 80
+#       target_port = 3000
+#     }
+
+#     type = "LoadBalancer"
+#   }
+# }
