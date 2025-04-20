@@ -50,7 +50,9 @@ pipeline {
 
     post {
         always {
-            slackSend channel: '#build-notifications', color: 'good', message: "✅ *Build Deployed Successfully*, downstream job triggered!"
+            script {
+                sh 'echo "✅ Build Deployed Successfully, downstream job triggered!"'
+            }
         }
     }
 }
