@@ -5,9 +5,11 @@
     ENV NODE_ENV=${NODE_ENV}
     
     # Install dependencies for native builds if needed
-    RUN apt-get update && apt-get install -y \
-        curl \
-        && rm -rf /var/lib/apt/lists/*
+    RUN apt-get update && \
+        apt-get upgrade -y && \
+        apt-get install --only-upgrade perl-base zlib1g && \
+        apt-get clean && rm -rf /var/lib/apt/lists/*
+
     
     WORKDIR /usr/src/app
     

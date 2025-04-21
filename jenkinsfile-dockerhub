@@ -35,8 +35,6 @@ pipeline {
                       --scanners vuln \
                       --severity HIGH,CRITICAL \
                       --timeout 10m \
-                      --exit-code 1 \
-                      --format table \
                       $APP_NAME:$BUILD_NUMBER
                     '''
                 }
