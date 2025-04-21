@@ -28,3 +28,4 @@ yarn-error.log*
 *.tfstate.backup
 .terraform.lock.hcl
 crash.log.terraform/
+dosetup/terraform.tfvars
