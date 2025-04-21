@@ -42,7 +42,7 @@ pipeline {
         }
         stage('Push image') {
             steps{
-                sh 'docker push $APP_NAME:$BUILD_NUMBER'
+                sh 'docker push --quiet $APP_NAME:$BUILD_NUMBER'
             }
         }
         stage('Trigger ManifestUpdate') {
