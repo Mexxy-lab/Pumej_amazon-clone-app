@@ -34,7 +34,7 @@ pipeline {
                     trivy image \
                       --scanners vuln \
                       --severity HIGH,CRITICAL \
-                      --timeout 5m \
+                      --timeout 10m \
                       --exit-code 1 \
                       --format table \
                       $APP_NAME:$BUILD_NUMBER
