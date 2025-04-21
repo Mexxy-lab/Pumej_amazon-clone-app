@@ -24,12 +24,24 @@ pipeline {
                 sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
             }
         }
-    //     stage('Trivy Scan (Aqua)') {
-    //         steps {
-    //             //Used to run for Vulnerability scans on your codes also
-    //             sh 'trivy image $APP_NAME:$BUILD_NUMBER'
-    //         }
-    //    }
+        stage('Trivy Scan (Aqua)') {
+            steps {
+                script {
+                    sh '''
+                    echo "🔍 Running Trivy vulnerability scan..."
+                    
+                    # Run Trivy with severity filter and a timeout
+                    trivy image \
+                      --scanners vuln \
+                      --severity HIGH,CRITICAL \
+                      --timeout 5m \
+                      --exit-code 1 \
+                      --format table \
+                      $APP_NAME:$BUILD_NUMBER
+                    '''
+                }
+            }
+        }
         stage('Push image') {
             steps{
                 sh 'docker push $APP_NAME:$BUILD_NUMBER'

@@ -28,7 +28,23 @@ pipeline {
 
             }
         }
+        stage('Trivy Scan (Aqua)') {
+            steps {
+                script {
+                    sh """
+                    echo "🔍 Running Trivy vulnerability scan..."
 
+                    trivy image \
+                      --scanners vuln \
+                      --severity HIGH,CRITICAL \
+                      --timeout 5m \
+                      --exit-code 1 \
+                      --format table \
+                      ${registyUrl}/${ECR_NAME}:${IMAGE_TAG}
+                    """
+                }
+            }
+        }
         stage('Upload Image to Amazon Container Repository') {
             steps {
                 script {
