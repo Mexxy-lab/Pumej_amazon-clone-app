@@ -1,20 +1,38 @@
-FROM node:16
+# ---------- Build Stage ----------
+    FROM node:18-slim AS builder
 
-ARG NODE_ENV=production
-ENV NODE_ENV=${NODE_ENV}
-
-WORKDIR /usr/src/app
-
-# Copy dependency files first to leverage Docker layer caching
-COPY package.json .
-COPY yarn.lock .
-
-# Optional: use network host during build only if you're building with --network=host
-# You can also add a debug curl step before yarn install to confirm registry access
-RUN curl -IL https://registry.yarnpkg.com && yarn install --network-timeout 600000
-
-# Then copy the rest of the source files
-COPY . .
-
-# Run your app
-CMD ["yarn", "start"]
+    ARG NODE_ENV=production
+    ENV NODE_ENV=${NODE_ENV}
+    
+    # Install dependencies for native builds if needed
+    RUN apt-get update && apt-get install -y \
+        curl \
+        && rm -rf /var/lib/apt/lists/*
+    
+    WORKDIR /usr/src/app
+    
+    # Copy only dependency-related files first
+    COPY package.json yarn.lock ./
+    
+    # Install production dependencies
+    RUN yarn install --frozen-lockfile --production --network-timeout 600000
+    
+    # ---------- Production Stage ----------
+    FROM node:18-slim AS production
+    
+    ARG NODE_ENV=production
+    ENV NODE_ENV=${NODE_ENV}
+    
+    WORKDIR /usr/src/app
+    
+    # Copy only node_modules from builder
+    COPY --from=builder /usr/src/app/node_modules ./node_modules
+    
+    # Copy the app source
+    COPY . .
+    
+    # Optional: remove dev-only files (like .env, test folders, etc.)
+    # RUN rm -rf tests/ .env.dev
+    
+    CMD ["yarn", "start"]
+    
