@@ -80,7 +80,8 @@ pipeline {
 
     environment {
         AWS_REGION = "ap-south-1"
-        AWS_CREDENTIALS = credentials('aws-ecr-credentials')
+        AWS_ACCESS_KEY_ID     = credentials('pumej_aws_access_id')
+        AWS_SECRET_ACCESS_KEY = credentials('pumej_aws_secret_key')
         ECR_NAME = "pumejrepo"
         registryUrl = "598189530267.dkr.ecr.ap-south-1.amazonaws.com"
         IMAGE_TAG = "v1.0"
@@ -105,8 +106,8 @@ pipeline {
             steps {
                 sh """
                     echo "🔑 Logging into Amazon ECR..."
-                    aws configure set aws_access_key_id $AWS_CREDENTIALS_USR
-                    aws configure set aws_secret_access_key $AWS_CREDENTIALS_PSW
+                    aws configure set aws_access_key_id ${AWS_ACCESS_KEY_ID}
+                    aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY}
                     aws configure set region ${AWS_REGION}
                     aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${registryUrl}
                 """
