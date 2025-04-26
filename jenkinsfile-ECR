@@ -131,7 +131,7 @@ pipeline {
             steps {
                 sh """
                     echo "🚀 Pushing Docker image to Amazon ECR..."
-                    docker push --quiet ${registryUrl}/${ECR_NAME}:${IMAGE_TAG}
+                    docker push ${registryUrl}/${ECR_NAME}:${IMAGE_TAG}
                 """
             }
         }
