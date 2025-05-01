@@ -23,8 +23,8 @@ resource "aws_ecs_task_definition" "my_task_definition" {
     "image": "598189530267.dkr.ecr.ap-south-1.amazonaws.com/pumejrepo:v1.0",
     "portMappings": [
       {
-        "containerPort": 3000,
-        "hostPort": 3000
+        "containerPort": 80,
+        "hostPort": 80
       }
     ]
   }
