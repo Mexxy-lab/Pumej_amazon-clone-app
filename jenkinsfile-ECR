@@ -95,7 +95,7 @@ pipeline {
         stage('Set Image Tag') {
             steps {
                 script {
-                    env.IMAGE_TAG = "v.${env.BUILD_NUMBER}.0"
+                    env.IMAGE_TAG = "v${env.BUILD_NUMBER}.0"
                 }
             }
         }         
