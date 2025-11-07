@@ -1,0 +1,117 @@
+image: node:16.0
+
+stages:          
+  - build
+  - test
+  - sonarqube-fullscan
+  - sonarqube-check
+  - sonarqube-vulnerability-report
+  - package
+  - deploy
+
+variables:
+  IMAGE_NAME: registry.gitlab.com/mexxy-lab/phpproject
+
+before_script:
+  - echo "Running job in stage $CI_JOB_STAGE"
+
+build-job:       
+  stage: build
+  tags:
+    - yarn
+    - ubuntu
+    - netflix
+  script:
+    - npm install
+
+
+test-job:
+  stage: test
+  tags:
+    - yarn
+    - ubuntu
+    - netflix
+  script:
+    - echo "Running tests"
+    - npm install
+    - npm test -- --watchAll=false
+
+sonarqube-analysis:
+  stage: sonarqube-fullscan
+  tags:
+    - yarn
+    - ubuntu
+    - netflix
+  script:
+    - sonar-scanner -Dsonar.projectKey=Amazon-clone-app -Dsonar.sources=. -Dsonar.host.url=http://172.21.153.111:9000 -Dsonar.login=$SONAR_TOKEN
+
+sonarqube-check:
+  stage: sonarqube-check
+  tags:
+    - netflix
+    - ubuntu
+    - yarn
+  # image: 
+  #   name: sonarsource/sonar-scanner-cli:5.0
+  #   entrypoint: [""]
+  variables:
+    SONAR_USER_HOME: "/etc/gitlab-runner/.sonar" # Defines the location of the analysis task cache
+    GIT_DEPTH: "0"   # Tells git to fetch all the branches of the project, required by the analysis task
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - /etc/gitlab-runner/.sonar/cache
+  script: 
+    - sonar-scanner -Dsonar.token=$SONAR_TOKEN
+  allow_failure: true
+  only:
+    - main
+
+sonarqube-vulnerability-report:
+  stage: sonarqube-vulnerability-report
+  tags:
+    - netflix
+    - ubuntu
+    - yarn
+  script:
+    - 'curl -u "${SONAR_TOKEN}:" "${SONAR_HOST_URL}/api/issues/gitlab_sast_export?projectKey=Amazon-clone-app&branch=${CI_COMMIT_BRANCH}&pullRequest=${CI_MERGE_REQUEST_IID}" -o gl-sast-sonar-report.json'
+  allow_failure: true
+  only:
+    - main
+    - develop
+  artifacts:
+    expire_in: 1 day
+    reports:
+      sast: gl-sast-sonar-report.json
+  dependencies:
+    - sonarqube-check
+
+package-job:
+  stage: package
+  image: docker:latest
+  # services:
+  #   - docker:dind
+  tags:
+    - docker
+    - ubuntu
+    - pumej
+  script:
+    - echo "$REGISTRY_PASSWORD" | docker login -u "$REGISTRY_USER" --password-stdin registry.gitlab.com
+    - docker build -t $IMAGE_NAME:$CI_PIPELINE_IID .
+    - docker push $IMAGE_NAME:$CI_PIPELINE_IID
+
+# deploy-job:
+#   stage: deploy
+#   tags:
+#     - yarn
+#     - ubuntu
+#     - netflix
+#   script:
+#     - export KUBECONFIG=$HOME/.kube/config
+#     - kubectl config current-context || echo "kubectl context not found"
+#     - kubectl apply -f application.yaml
+#     - kubectl get nodes 
+#     - kubectl get pods -n default
+#     - kubectl get services -n default
+#     - kubectl get deployments -n default
+#     - kubectl describe deployment phpapp -n default
