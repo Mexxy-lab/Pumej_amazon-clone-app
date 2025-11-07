@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: amazonapp-container
-          image: registry.gitlab.com/mexxy-lab/npmproject:1
+          image: registry.gitlab.com/mexxy-lab/pumej_amazon-clone-app:2
           resources:
             limits:
               memory: 128Mi
@@ -34,10 +34,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: nodejsapp-service
+  name: amazonapp-service
 spec:
   selector:
-    app: nodejsapp
+    app: amazonapp
   ports:
   - protocol: TCP
     port: 80

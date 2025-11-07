@@ -10,7 +10,7 @@ stages:
   - deploy
 
 variables:
-  IMAGE_NAME: registry.gitlab.com/mexxy-lab/phpproject
+  IMAGE_NAME: registry.gitlab.com/mexxy-lab/pumej_amazon-clone-app
 
 before_script:
   - echo "Running job in stage $CI_JOB_STAGE"
