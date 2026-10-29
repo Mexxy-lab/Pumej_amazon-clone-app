@@ -1,4 +1,4 @@
-# Welcome to CICD Project for NETFLIX clone app in Javascript
+# Welcome to CICD Project for Amazon clone app in Javascript
 
 This is a CICD project for deploying a Amazon clone app.
 
