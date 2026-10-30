@@ -155,4 +155,4 @@ kubectl apply -f issuer.yml                 | Applied to namespace where app was
 kubectl get certificate                     | Used to get the certificate, should return true 
 ```
 
-- You can check your website again | Should show your connection as secured
+- You can check your website again | Should show your connection as secured. Testing the webhook feature with jenkins
