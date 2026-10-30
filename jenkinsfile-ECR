@@ -89,7 +89,7 @@ pipeline {
                 }
             }
         }
-
+        // Login to Amazon ECR Public before pushing the Docker image.
         stage('Login to ECR') {
             steps {
                 sh '''
