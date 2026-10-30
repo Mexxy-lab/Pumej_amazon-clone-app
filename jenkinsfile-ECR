@@ -131,9 +131,31 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                sh """
-                    docker build --network=host -t ${registryUrl}/${ECR_NAME}:${IMAGE_TAG} .
-                """
+                // Retrieve Docker Hub credentials securely from Jenkins.
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'dockerhub-credentials',
+                        usernameVariable: 'DOCKERHUB_USERNAME',
+                        passwordVariable: 'DOCKERHUB_TOKEN'
+                    )
+                ]) {
+                    sh '''
+                        # Stop the shell from printing commands containing credentials.
+                        set +x
+
+                        # Authenticate to Docker Hub using the Jenkins-managed token.
+                        echo "$DOCKERHUB_TOKEN" | docker login \
+                            --username "$DOCKERHUB_USERNAME" \
+                            --password-stdin
+
+                        # Build the application image using the Dockerfile.
+                        docker build --network=host \
+                            -t "${registryUrl}/${ECR_NAME}:${IMAGE_TAG}" .
+
+                        # Log out after the build; the built image remains available locally.
+                        docker logout
+                    '''
+                }
             }
         }
 
