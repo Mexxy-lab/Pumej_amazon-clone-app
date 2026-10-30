@@ -90,6 +90,7 @@ pipeline {
             }
         }
         // Login to Amazon ECR Public before pushing the Docker image.
+        // Region for Amazon ECR Public authentication is us-east-1.
         stage('Login to ECR') {
             steps {
                 sh '''
