@@ -83,7 +83,7 @@ pipeline {
         AWS_ACCESS_KEY_ID     = credentials('pumej_aws_access_id')
         AWS_SECRET_ACCESS_KEY = credentials('pumej_aws_secret_key')
         ECR_NAME = "pumejrepo"
-        registryUrl = "598189530267.dkr.ecr.ap-south-1.amazonaws.com"
+        registryUrl = "public.ecr.aws/p9c7s9q0/pumejrepo"
     }
 
     stages {
