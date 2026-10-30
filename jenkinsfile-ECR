@@ -1,76 +1,3 @@
-// pipeline {
-//     agent any
-
-//     options {
-//         timeout(time: 10, unit: 'MINUTES')
-//     }
-
-//     environment {
-//         ECR_NAME = "pumejrepo"
-//         registyUrl = "598189530267.dkr.ecr.ap-south-1.amazonaws.com"
-//         IMAGE_TAG = "v1.0"
-//     }
-
-//     stages {
-//         stage('SCM Checkout') {
-//             steps {
-//                 git branch: 'main', url: 'https://github.com/Mexxy-lab/Pumej_amazon-clone-app.git'
-//             }
-//         }
-
-//         stage('Build Docker image') {
-//             steps {
-//                 script {
-//                     sh """
-//                         docker build --network=host -t ${registyUrl}/${ECR_NAME}:${IMAGE_TAG} .
-//                     """
-//                 }
-
-//             }
-//         }
-//         stage('Trivy Scan (Aqua)') {
-//             steps {
-//                 script {
-//                     sh """
-//                     echo "🔍 Running Trivy vulnerability scan..."
-
-//                     trivy image \
-//                       --scanners vuln \
-//                       --severity HIGH,CRITICAL \
-//                       --timeout 10m \
-//                       ${registyUrl}/${ECR_NAME}:${IMAGE_TAG}
-//                     """
-//                 }
-//             }
-//         }
-//         stage('Upload Image to Amazon Container Repository') {
-//             steps {
-//                 script {
-//                     docker.withRegistry("https://${registyUrl}", 'ecr:ap-south-1:pumejawsecr') {
-//                         sh "docker push --quiet ${registyUrl}/${ECR_NAME}:${IMAGE_TAG}"
-//                     }
-//                 }
-//             }
-//         }
-
-//         stage('Trigger ManifestUpdate') {
-//             steps {
-//                 build job: 'argocd-manifest-amazon', parameters: [
-//                     string(name: 'DOCKERTAG', value: env.BUILD_NUMBER)
-//                 ]
-//             }
-//         }
-//     }
-
-//     post {
-//         always {
-//             script {
-//                 sh 'echo "✅ Build Deployed Successfully, downstream job triggered!"'
-//             }
-//         }
-//     }
-// }
-
 pipeline {
     agent any
 
@@ -80,10 +7,14 @@ pipeline {
 
     environment {
         AWS_REGION = "ap-south-1"
+
+        // Jenkins-managed AWS credentials.
         AWS_ACCESS_KEY_ID     = credentials('pumej_aws_access_id')
         AWS_SECRET_ACCESS_KEY = credentials('pumej_aws_secret_key')
-        ECR_NAME = "pumejrepo"
-        registryUrl = "public.ecr.aws/p9c7s9q0/pumejrepo"
+
+        // Amazon ECR Public registry and repository.
+        ECR_REGISTRY = "public.ecr.aws"
+        ECR_REPOSITORY = "p9c7s9q0/pumejrepo"
     }
 
     stages {
@@ -131,7 +62,7 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                // Retrieve Docker Hub credentials securely from Jenkins.
+                // Retrieve Docker Hub credentials from Jenkins.
                 withCredentials([
                     usernamePassword(
                         credentialsId: 'dockerhub-credentials',
@@ -140,19 +71,19 @@ pipeline {
                     )
                 ]) {
                     sh '''
-                        # Stop the shell from printing commands containing credentials.
+                        # Prevent credentials from being printed.
                         set +x
 
-                        # Authenticate to Docker Hub using the Jenkins-managed token.
+                        # Authenticate to Docker Hub for base image pulls.
                         echo "$DOCKERHUB_TOKEN" | docker login \
                             --username "$DOCKERHUB_USERNAME" \
                             --password-stdin
 
-                        # Build the application image using the Dockerfile.
+                        # Build the application image.
                         docker build --network=host \
-                            -t "${registryUrl}/${ECR_NAME}:${IMAGE_TAG}" .
+                            -t "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" .
 
-                        # Log out after the build; the built image remains available locally.
+                        # Remove Docker Hub login credentials after building.
                         docker logout
                     '''
                 }
@@ -161,35 +92,44 @@ pipeline {
 
         stage('Login to ECR') {
             steps {
-                sh """
-                    echo "🔑 Logging into Amazon ECR..."
-                    aws configure set aws_access_key_id ${AWS_ACCESS_KEY_ID}
-                    aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY}
-                    aws configure set region ${AWS_REGION}
-                    aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${registryUrl}
-                """
+                sh '''
+                    # Authenticate to Amazon ECR Public.
+                    # ECR Public authentication uses us-east-1.
+                    set +x
+
+                    echo "Logging into Amazon ECR Public..."
+
+                    aws ecr-public get-login-password \
+                        --region us-east-1 | \
+                        docker login \
+                            --username AWS \
+                            --password-stdin "$ECR_REGISTRY"
+                '''
             }
         }
 
         stage('Trivy Scan (Aqua)') {
             steps {
-                sh """
-                    echo "🔍 Running Trivy vulnerability scan..."
+                sh '''
+                    echo "Running Trivy vulnerability scan..."
+
                     trivy image \
-                      --scanners vuln \
-                      --severity HIGH,CRITICAL \
-                      --timeout 10m \
-                      ${registryUrl}/${ECR_NAME}:${IMAGE_TAG}
-                """
+                        --scanners vuln \
+                        --severity HIGH,CRITICAL \
+                        --timeout 10m \
+                        "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+                '''
             }
         }
 
         stage('Push Docker Image to ECR') {
             steps {
-                sh """
-                    echo "🚀 Pushing Docker image to Amazon ECR..."
-                    docker push ${registryUrl}/${ECR_NAME}:${IMAGE_TAG}
-                """
+                sh '''
+                    echo "Pushing Docker image to Amazon ECR Public..."
+
+                    docker push \
+                        "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+                '''
             }
         }
 
