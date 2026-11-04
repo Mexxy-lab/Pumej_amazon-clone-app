@@ -50,6 +50,7 @@ kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/st
 - Access the application using the port-forwarding command below
 
 ```bash
+kubectl port-forward -n argocd service/argocd-server 8082:443
 kubectl port-forward service/argocd-server -n argocd 8082:443  | Used to start the service, accessed on localhost:8082
 ```
 
